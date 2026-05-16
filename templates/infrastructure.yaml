@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Infraestrutura Automatizada - Desafio AWS CloudFormation (DIO)'
+
+Parameters:
+  EnvironmentType:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: Tipo de ambiente para o deploy dos recursos.
+
+Resources:
+  # 1. Criação de um Bucket S3 para Armazenamento de Arquivos
+  AppStorageBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub 'dio-app-storage-${EnvironmentType}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentType
+        - Key: Project
+          Value: DIO-CloudFormation
+
+  # 2. Criação de uma Instância EC2 (Servidor Web Simples)
+  SimpleWebServer:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      # ID de uma AMI padrão (Amazon Linux 2) - Pode variar por região
+      ImageId: ami-0c55b159cbfafe1f0 
+      Tags:
+        - Key: Name
+          Value: !Sub 'WebServer-${EnvironmentType}'
+        - Key: Environment
+          Value: !Ref EnvironmentType
+
+Outputs:
+  BucketName:
+    Description: Nome do Bucket S3 criado na Stack.
+    Value: !Ref AppStorageBucket
+  InstanceId:
+    Description: ID da Instância EC2 criada na Stack.
+    Value: !Ref SimpleWebServer
